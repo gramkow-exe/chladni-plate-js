@@ -162,6 +162,7 @@ class ChladniPlate {
 
       // gradiente sera calculado somente quando necessário
       // nem sei se isso ajuda, mas vamos tentar
+      // ^^^^^AJUDOU  MUITOOOO
       if (gradient == undefined) {
         // por algum motivo havia a possibilidade de não haver gradiente
         // sla né
