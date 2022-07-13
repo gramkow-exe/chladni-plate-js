@@ -8,6 +8,7 @@
                 padding: 0;
                 overflow-y: hidden;
                 overflow-x: hidden;
+                height: 100%;
             }
             canvas{
                 width: 100%;
@@ -40,6 +41,36 @@
             .rosa{
                 background-color: palevioletred;
             }
+            .m{
+                display: flex;
+                position: absolute;
+                flex-direction: column;
+                right: 0;
+                top:0;
+                align-items: center;
+                justify-content: center;
+                height: 100%;
+                margin-right: 10;
+            }
+            .n{
+                display: flex;
+                position: absolute;
+                flex-direction: column;
+                left: 0;
+                top:0;
+                align-items: center;
+                justify-content: center;
+                height: 100%;
+                margin-right: 10;
+            }
+            .m_button{
+                width: 35px;
+                height: 35px;
+                background-color: rgba(255, 255, 255, 0.5);
+                border-radius: 5px;
+                text-align: center;
+                cursor: pointer;
+            }
         </style>
     </head>
     <body>
@@ -57,6 +88,26 @@
                 <div class="cor rosa"></div>
             </a>
             
+        </div>
+
+        <div class="m">
+            <button onclick="handleMoreH()" class="m_button">
+                + h
+            </button>
+            <h4 style="color: white;">Horizontal</h4>
+            <button onclick="handleLessH()" class="m_button">
+                - h
+            </button>
+        </div>
+
+        <div class="n">
+            <button onclick="handleMoreV()" class="m_button">
+                + h
+            </button>
+            <h4 style="color: white;">Vertical</h4>
+            <button onclick="handleLessV()" class="m_button">
+                - h
+            </button>
         </div>
         
 

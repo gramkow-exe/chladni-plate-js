@@ -1,8 +1,8 @@
 
 
-const vibration = 0;
-const numParticles = 40000
-const scale = 1;
+const vibration = 1;
+const numParticles = 50000
+const scale = 2;
 const changePatternDelay = 1e10;
 const minVibrationToMove = 0.2;
 
@@ -23,6 +23,8 @@ const PURPLE = (127, 0, 255);
 var color = RED
 
 
+
+
 function handleGreenClick(){
   color = GREEN;
 }
@@ -41,7 +43,13 @@ class ChladniParams {
     this.l = L;
   }
 }
-const params = [new ChladniParams(4, 1, 0.03)];
+
+var m1 = 2
+var n1 = 5
+var l1 = 0.04
+const params = [new ChladniParams(m1, n1, l1)];
+
+
 
 class Particle {
   constructor(pos, color, size) {
@@ -49,7 +57,6 @@ class Particle {
     this.color = color;
     this.size = size;
   }
-  draw(can) {}
 }
 
 class Vector2 {
@@ -73,7 +80,7 @@ class ChladniPlate {
     this.buffer = new Uint32Array(this.imageData.data.buffer);
     this.particles = [];
     for (let index = 0; index < numParticles; index++) {
-      const pos = new Vector2(WIDTH * Math.random(), HEIGHT * Math.random());
+      const pos = new Vector2(this.width * Math.random(), this.height * Math.random());
       this.particles.push( new Particle(pos, PURPLE, 1));
     }
     canvas.setAttribute("width", this.width);
@@ -179,7 +186,7 @@ class ChladniPlate {
     const M = chladniParams.m;
     const N = chladniParams.n;
     const L = chladniParams.l * this.scale;
-    this.vibrations = Array.from(Array(Math.round(this.width * this.height)).keys())
+    this.vibrations = Array.from(Array(Math.round(this.width * this.height)))
     for (let y = 0; y < Math.round(this.height); y++) {
       for (let x = 0; x < Math.round(this.width); x++) {
         var scaledX = x * L;
@@ -198,14 +205,34 @@ class ChladniPlate {
     }
 
   }
+}
 
-  draw() {
-    for (let particle of this.particles) {
-      particle.draw();
-    }
-  }
+var a =new ChladniPlate()
+
+function handleMoreH(){
+  params[0].m +=1
+  a.computeVibrations(params[0])
+  console.log(params[0])
   
+}
+
+function handleLessH(){
+  params[0].m -=1
+  a.computeVibrations(params[0])
+  console.log(params[0])
 
 }
 
-new ChladniPlate()
+function handleMoreV(){
+  params[0].n +=1
+  a.computeVibrations(params[0])
+  console.log(params[0])
+  
+}
+
+function handleLessV(){
+  params[0].n -=1
+  a.computeVibrations(params[0])
+  console.log(params[0])
+
+}
