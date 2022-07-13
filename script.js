@@ -49,8 +49,6 @@ var n1 = 5
 var l1 = 0.04
 const params = [new ChladniParams(m1, n1, l1)];
 
-
-
 class Particle {
   constructor(pos, color, size) {
     this.pos = pos;
@@ -86,67 +84,125 @@ class ChladniPlate {
     canvas.setAttribute("width", this.width);
     canvas.setAttribute("height", this.height);
     this.computeVibrations(params[0]);
-    this.update()
-    
+
+    requestAnimationFrame(this.update.bind(this))
   }
+
   vibrateParticles() {
-    for (let particle of this.particles) {
-      let newPos = new Vector2(
+    for (let i = this.particles.length;i--;) {
+      this.particles[i].pos.add(
         (Math.random() - 0.5) * vibration,
-        (Math.random() - 0.5) * vibration
-      );
-      particle.pos.add(newPos.x, newPos.y);
+        (Math.random() - 0.5) * vibration,
+      )
     }
   }
 
-  moveTowardsPattern() {
-    
-    var gradients = Array(Math.round(this.width * this.height))
-    for (let y = 1; y < Math.round(this.height) - 1; y++) {
-      for (let x = 1; x < Math.round(this.width) - 1; x++) {
-        const idx = y * Math.round(this.width) + x;
-        const vibration = this.vibrations[idx];
+  // moveTowardsPatternSlow() {
+  //   var gradients = Array(Math.round(this.width * this.height))
+  //   for (let y = 1; y < Math.round(this.height) - 1; y++) {
+  //     for (let x = 1; x < Math.round(this.width) - 1; x++) {
+  //       const idx = y * Math.round(this.width) + x;
+  //       const vibration = this.vibrations[idx];
 
-        if (vibration < minVibrationToMove) {
-          gradients[idx] = new Vector2(0, 0);
+  //       if (vibration < minVibrationToMove) {
+  //         gradients[idx] = new Vector2(0, 0);
+  //         continue;
+  //       }
+
+  //       var minVibration = 100;
+  //       var candidates = [];
+  //       candidates.push(new Vector2(0,0))
+  //       for (let ny of [-1, 0, 1]) {
+  //         for (let nx of [-1, 0, 1]) {
+  //           if (ny == 0 && nx == 0) {
+  //             continue;
+  //           }
+
+  //           const nIdx = (y + ny) * Math.round(this.width) + (x + nx);
+  //           const nVibration = this.vibrations[nIdx];
+            
+  //           if (nVibration <= minVibration) {
+  //             if (nVibration < minVibration) {
+  //               minVibration = nVibration;
+  //               // candidates = [];
+  //             }
+  //             candidates.push(new Vector2(nx, ny));
+  //           }
+  //         }
+  //       }
+
+  //       var chosenIndex  = candidates.length == 1 ? 0 : Math.floor(Math.random() * candidates.length)
+  //       var chosenCandidate = candidates[chosenIndex];
+  //       gradients[idx] = chosenCandidate;
+  //     }
+  //   }
+  //   for (let particle of this.particles) {
+  //     var idx =
+  //       Math.round(particle.pos.y / this.scale) * Math.round(this.width) +
+  //       Math.round(particle.pos.x / this.scale);
+  //     var gradient = gradients[idx];
+
+  //     if (gradient == undefined){
+  //       continue
+  //     }
+  //     particle.pos.add(gradient.x, gradient.y)
+  //   }
+  // }
+
+  moveTowardsPattern() {
+    // não acho que é necessário tanto Math.round?
+    // width e height são inicializados sempre com inteiros
+    let gradients = Array(Math.round(this.width * this.height / this.scale));
+
+    for (let particle of this.particles) {
+      let x = Math.round(particle.pos.x / this.scale);
+      let y = Math.round(particle.pos.y / this.scale);
+      let gradientIndex = y * this.width + x;
+      let gradient = gradients[gradientIndex];
+
+      // gradiente sera calculado somente quando necessário
+      // nem sei se isso ajuda, mas vamos tentar
+      if (gradient == undefined) {
+        // por algum motivo havia a possibilidade de não haver gradiente
+        // sla né
+        if (y < 1 || y >= this.height || x < 1 || x >= this.width) {
           continue;
         }
 
-        var minVibration = 100;
-        var candidates = [];
-        candidates.push(new Vector2(0,0))
-        for (let ny of [-1, 0, 1]) {
-          for (let nx of [-1, 0, 1]) {
-            if (ny == 0 && nx == 0) {
-              continue;
-            }
+        if (this.vibrations[gradientIndex] < minVibrationToMove) {
+          gradient = new Vector2(0, 0);
+        } else {
+          let minVibration = 100;
+          let candidates = [];
 
-            const nIdx = (y + ny) * Math.round(this.width) + (x + nx);
-            const nVibration = this.vibrations[nIdx];
-            
-            if (nVibration <= minVibration) {
-              if (nVibration < minVibration) {
-                minVibration = nVibration;
-                // candidates = [];
+          candidates.push(new Vector2(0, 0));
+
+          for (let nx = -1; nx <= 1; ++nx) {
+            for (let ny = -1; ny <= 1; ++ny) {
+              if (nx == 0 && ny == 0) {
+                continue;
               }
-              candidates.push(new Vector2(nx, ny));
+              
+              const nIdx = (y + ny) * this.width + (x + nx);
+              const nVibration = this.vibrations[nIdx];
+
+              if (nVibration <= minVibration) {
+                minVibration = nVibration;
+                candidates.push(new Vector2(nx, ny));
+              }
             }
           }
-        }
-        var chosenIndex  = candidates.length == 1 ? 0 : Math.floor(Math.random() * candidates.length)
-        var chosenCandidate = candidates[chosenIndex];
-        gradients[idx] = chosenCandidate;
-      }
-    }
-    for (let particle of this.particles) {
-      var idx =
-        Math.round(particle.pos.y / this.scale) * Math.round(this.width) +
-        Math.round(particle.pos.x / this.scale);
-      var gradient = gradients[idx];
 
-      if (gradient == undefined){
-        continue
+          if (candidates.length == 1) {
+            gradient = candidates[0];
+          } else {
+            gradient = candidates[Math.floor(Math.random() * candidates.length)]
+          }
+        }
+
+        gradients[gradientIndex] = gradient
       }
+
       particle.pos.add(gradient.x, gradient.y)
     }
   }

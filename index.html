@@ -74,6 +74,16 @@
         </style>
     </head>
     <body>
+        <script src="https://mrdoob.github.io/stats.js/build/stats.min.js"></script>
+        <script>
+            var stats = new Stats();
+            document.body.append(stats.dom);
+            requestAnimationFrame(function loop() {
+                stats.update();
+                requestAnimationFrame(loop);
+            })
+        </script>
+    
         <script src="script.js"></script>
         <div class="menu">
             <a href="javascript:handleGreenClick();">
@@ -87,7 +97,7 @@
             <a href="javascript:handlePinkClick();">
                 <div class="cor rosa"></div>
             </a>
-            
+                       
         </div>
 
         <div class="m">
