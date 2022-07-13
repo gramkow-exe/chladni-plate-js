@@ -89,8 +89,8 @@ class ChladniPlate {
   }
 
   vibrateParticles() {
-    for (let i = this.particles.length;i--;) {
-      this.particles[i].pos.add(
+    for (let particle of this.particles) {
+      particle.pos.add(
         (Math.random() - 0.5) * vibration,
         (Math.random() - 0.5) * vibration,
       )
