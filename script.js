@@ -1,3 +1,5 @@
+
+
 const vibration = 1;
 const numParticles = 50000
 const scale = 2;
@@ -11,17 +13,22 @@ const canvas = document.createElement("canvas");
 const context = canvas.getContext("2d");
 document.body.appendChild(canvas);
 
+const WHITE = (255, 255, 255);
 const RED = 4278190335;
+const BLUE = (0, 0, 255);
 const GREEN = 4278255360;
 const PINK = 4294902015
+const PURPLE = (127, 0, 255);
 
-// feio para caralho. mais funciona ? eu acho
-const BLACK = (new Uint32Array(new Uint8ClampedArray([0, 0, 0, 255])))[0];
+var color = RED
 
-let color = RED
+
+
+
 function handleGreenClick(){
   color = GREEN;
 }
+
 function handleRedClick(){
   color = RED;
 }
@@ -40,10 +47,7 @@ class ChladniParams {
 var m1 = 2
 var n1 = 5
 var l1 = 0.04
-
-const params = [
-  new ChladniParams(m1, n1, l1)
-];
+const params = [new ChladniParams(m1, n1, l1)];
 
 class Vector2 {
   constructor(x, y) {
@@ -95,13 +99,14 @@ class ChladniPlate {
   }
 
   startLoops() {
+    // O CANVAS atualiza apenas quando for ser desenhado
     let drawFunc = this.draw.bind(this);
     requestAnimationFrame(function drawLoop() {
       drawFunc();
       requestAnimationFrame(drawLoop);
     });
 
-
+    // mas a simulação acontece todo milisegundo
     setInterval(this.update.bind(this), 1);
   }
 
@@ -112,10 +117,10 @@ class ChladniPlate {
       let index = Math.round(particle.pos.y) * this.width + Math.round(particle.pos.x);
       index *= 4;
 
-      this.imageData.data[index] = 255;
-      this.imageData.data[index+1] = 0;
-      this.imageData.data[index+2] = 0;
-      this.imageData.data[index+3] = 255;
+      this.imageData.data[index] = 255; // r (entre 0 e 255)
+      this.imageData.data[index+1] = 0; // g
+      this.imageData.data[index+2] = 0; // b
+      this.imageData.data[index+3] = 255; // a (alpha) (transparente = 0, totalmente visivel = 255)
     }
 
     context.putImageData(this.imageData, 0, 0);
@@ -131,6 +136,8 @@ class ChladniPlate {
   }
 
   moveTowardsPattern() {
+    // não acho que é necessário tanto Math.round?
+    // width e height são inicializados sempre com inteiros
     let gradients = Array(Math.round(this.width * this.height / this.scale));
 
     for (let particle of this.particles) {
@@ -139,7 +146,12 @@ class ChladniPlate {
       let gradientIndex = y * this.width + x;
       let gradient = gradients[gradientIndex];
 
+      // gradiente sera calculado somente quando necessário
+      // nem sei se isso ajuda, mas vamos tentar
+      // ^^^^^AJUDOU  MUITOOOO
       if (gradient == undefined) {
+        // por algum motivo havia a possibilidade de não haver gradiente
+        // sla né
         if (y < 1 || y >= this.height || x < 1 || x >= this.width) {
           continue;
         }
@@ -171,11 +183,11 @@ class ChladniPlate {
           if (candidates.length == 1) {
             gradient = candidates[0];
           } else {
-            gradient = candidates[Math.floor(Math.random() * candidates.length)]
+            gradient = candidates[Math.floor(Math.random() * candidates.length)];
           }
         }
 
-        gradients[gradientIndex] = gradient
+        gradients[gradientIndex] = gradient;
       }
 
       particle.pos.add(gradient.x, gradient.y);
@@ -187,20 +199,38 @@ class ChladniPlate {
     this.moveTowardsPattern();
   }
 
+  checkFallenParticles(offScreenLimit = 0) {
+    for (let particle of this.particles) {
+      if (
+        particle.pos.x < -offScreenLimit ||
+        particle.pos.x > WIDTH + offScreenLimit ||
+        particle.pos.y < -offScreenLimit ||
+        particle.pos.y > WIDTH + offScreenLimit
+      ) {
+        particle.pos = new Vector2(Math.random() * WIDTH, Math.random() * HEIGHT);
+      }
+    }
+  }
+
   computeVibrations(chladniParams) {
-    const mscale = chladniParams.m * chladniParams.l * this.scale;
-    const nscale = chladniParams.n * chladniParams.l * this.scale;
+    const M = chladniParams.m;
+    const N = chladniParams.n;
+    const L = chladniParams.l * this.scale;
+    this.vibrations = Array.from(Array(Math.round(this.width * this.height)))
+    for (let y = 0; y < Math.round(this.height); y++) {
+      for (let x = 0; x < Math.round(this.width); x++) {
+        var scaledX = x * L;
+        var scaledY = y * L;
+        var MX = M * scaledX;
+        var NX = N * scaledX;
+        var MY = M * scaledY;
+        var NY = N * scaledY;
+        var value = Math.cos(NX) * Math.cos(MY) - Math.cos(MX) * Math.cos(NY);
+        value /= 2;
+        value *= Math.sign(value);
 
-    this.vibrations = Array(this.width * this.height);
-
-    for (let y = 0; y < this.height; y++) {
-      for (let x = 0; x < this.width; x++) {
-        let value =
-            Math.cos(nscale*x) * Math.cos(mscale*y)
-          - Math.cos(mscale*x) * Math.cos(nscale*y);
-
-        let index = y * Math.round(this.width) + x;
-        this.vibrations[index] = Math.abs(value/2);
+        var index = y * Math.round(this.width) + x;
+        this.vibrations[index] = value;
       }
     }
   }
