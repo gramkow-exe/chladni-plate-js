@@ -20,20 +20,29 @@ const GREEN = 4278255360;
 const PINK = 4294902015
 const PURPLE = (127, 0, 255);
 
-var color = RED
-
-
-
+let color = {
+  r: 255,
+  g: 0,
+  b: 0,
+  a: 255, // alpha (transparente = 0, totalmente visivel = 255)
+}
 
 function handleGreenClick(){
-  color = GREEN;
+  color.r = 0;
+  color.g = 255;
+  color.b = 0;
 }
 
 function handleRedClick(){
-  color = RED;
+  color.r = 255;
+  color.g = 0;
+  color.b = 0;
 }
+
 function handlePinkClick(){
-  color = PINK;
+  color.r = 216;
+  color.g = 112;
+  color.b = 147;
 }
 
 class ChladniParams {
@@ -111,16 +120,21 @@ class ChladniPlate {
   }
 
   draw() {
-    this.imageData.data.fill(0);
+    // so ter isso aqui ganha uns 5 fps???
+    // valeu javascript
+    const {r, g, b, a} = color;
+    const colorBuffer = this.imageData.data
+    
+    colorBuffer.fill(0);
 
-    for (let particle of this.particles) {
-      let index = Math.round(particle.pos.y) * this.width + Math.round(particle.pos.x);
-      index *= 4;
+    for (let i = this.particles.length; i--;) {
+      let pos = this.particles[i].pos;
+      let index = (Math.round(pos.y) * this.width + Math.round(pos.x)) * 4;
 
-      this.imageData.data[index] = 255; // r (entre 0 e 255)
-      this.imageData.data[index+1] = 0; // g
-      this.imageData.data[index+2] = 0; // b
-      this.imageData.data[index+3] = 255; // a (alpha) (transparente = 0, totalmente visivel = 255)
+      colorBuffer[index] = r;
+      colorBuffer[index+1] = g;
+      colorBuffer[index+2] = b;
+      colorBuffer[index+3] = a;
     }
 
     context.putImageData(this.imageData, 0, 0);
