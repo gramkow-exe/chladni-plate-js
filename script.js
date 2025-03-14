@@ -2,7 +2,7 @@
 
 // Variáveis
 const vibration = 1;
-const numParticles = 50000
+const numParticles = 200000
 const scale = 2;
 const changePatternDelay = 1e10;
 const minVibrationToMove = 0.2;
@@ -42,7 +42,7 @@ class ChladniParams {
 }
 
 // Parâmetros para a placa (M, N e L)
-var m1 = 2
+var m1 = 4
 var n1 = 5
 var l1 = 0.04
 const params = [new ChladniParams(m1, n1, l1)];
@@ -224,30 +224,22 @@ class ChladniPlate {
 
 var plate = new ChladniPlate()
 
-function handleMoreH(){
+function handleMoreM(){
   params[0].m +=1
   plate.computeVibrations(params[0])
-  console.log(params[0])
-  
 }
 
-function handleLessH(){
+function handleLessM(){
   params[0].m -=1
   plate.computeVibrations(params[0])
-  console.log(params[0])
-
 }
 
-function handleMoreV(){
+function handleMoreN(){
   params[0].n +=1
   plate.computeVibrations(params[0])
-  console.log(params[0])
-  
 }
 
-function handleLessV(){
+function handleLessN(){
   params[0].n -=1
   plate.computeVibrations(params[0])
-  console.log(params[0])
-
 }
